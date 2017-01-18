@@ -35,7 +35,7 @@ flaskapp_app_pre_hooks: []
 flaskapp_app_post_hooks: []
 
 # The path to application config to use when launch application.
-flaskapp_app_config:
+flaskapp_app_config: requirements.txt
 
 # The Python version which should be installed
 flaskapp_python_version: 2.7
@@ -61,7 +61,7 @@ flaskapp_app_requires_npm: false
 flaskapp_app_requires_bower: false
 
 # Install and configure Postgresql
-flaskapp_use_postgresql: true
+flaskapp_use_postgresql: false
 
 # Postgresql db user
 flaskapp_postgresql_user: "{{ flaskapp_app_name }}"

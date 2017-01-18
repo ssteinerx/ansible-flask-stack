@@ -1,10 +1,13 @@
 ---
   # Deploy the application
 
+- name: Before run pre hooks
+  debug: msg="flaskapp_app_directory = {{flaskapp_app_directory}}"
+
 - name: Run pre hooks
   command: "{{ item }} chdir={{ flaskapp_app_directory }}"
-  with_items: flaskapp_app_pre_hooks
-  environment: flaskapp_app_environment
+  with_items: "{{ flaskapp_app_pre_hooks }}"
+  environment: "{{ flaskapp_app_environment }}"
   tags:
     - hook
 
@@ -12,19 +15,19 @@
   git: repo={{ app_repository }} dest={{ app_directory }}
     version={{ flaskapp_app_version }} accept_hostkey=true
     force=yes
-  when: app_repository is defined and app_repository
+  when: "{{ app_repository is defined and app_repository }}"
 
 - stat: path={{ flaskapp_app_config }}
   delegate_to: localhost
   sudo: false
   register: flaskapp_app_config_file
-  when: flaskapp_app_config is defined and flaskapp_app_config
+  when: "{{flaskapp_app_config is defined and flaskapp_app_config}}"
 
 - name: Copy application config to remote
   copy:
     src={{ flaskapp_app_config }}
     dest={{ flaskapp_app_directory }}
-  when: flaskapp_app_config_file is defined and flaskapp_app_config_file.stat.exists
+  when: "{{flaskapp_app_config_file is defined and flaskapp_app_config_file.stat.exists }}"
 
 - name: Install application dependencies into virtualenv
   pip:
@@ -34,31 +37,31 @@
 
 - name: Install required node packages
   npm: path={{ flaskapp_app_directory }} state=present
-  when: flaskapp_app_requires_npm
+  when: "{{ flaskapp_app_requires_npm }}"
 
 - name: Get path of the node binaries
   shell: npm bin
   args:
     chdir: "{{ flaskapp_app_directory }}"
   register: node_bin
-  when: flaskapp_app_requires_npm
+  when: "{{ flaskapp_app_requires_npm }}"
 
 - name: Install required bower packages
-  command: "{{ node_bin.stdout }}/bower --allow-root install"
+  command: "{{ node_bin.stdout /bower --allow-root install }}"
   args:
     chdir: "{{ flaskapp_app_directory }}"
-  when: flaskapp_app_requires_bower and node_bin
+  when: "{{flaskapp_app_requires_bower and node_bin}}"
 
 - name: Run migrations
   command: "{{ flaskapp_migration_command }}"
   args:
     chdir: "{{ flaskapp_app_directory }}"
-  when: flaskapp_run_migrations
+  when: "{{ flaskapp_run_migrations }}"
 
 - name: Run post hooks
-  command: "{{ item }} chdir={{ flaskapp_app_directory }}"
-  with_items: flaskapp_app_post_hooks
-  environment: flaskapp_app_environment
+  command: "{{ item chdir=flaskapp_app_directory }}"
+  with_items: "{{ flaskapp_app_post_hooks }}"
+  environment: "{{ flaskapp_app_environment }}"
   tags:
     - hook
 

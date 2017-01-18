@@ -3,7 +3,7 @@
 
 - name: Ensure packages required for the Flask application
   apt: pkg={{ item }} state=present
-  with_items: '{{ flaskapp_app_packages }}'
+  with_items: "{{ flaskapp_app_packages }}"
 
 - name: Install the latest pip version
   pip: name=pip extra_args='-U'
